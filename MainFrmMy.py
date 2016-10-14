@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
-from PyQt5.uic.properties import QtGui
-
 __author__ = 'user'
 import logging
 import sqlite3
-from PyQt5.QtGui import QStandardItemModel, QTextCursor, QTextCharFormat, QTextDocument,QIcon#,QPixmap, QPalette
+from PyQt5.QtGui import QStandardItemModel, QPalette, QTextCursor, QTextCharFormat, QTextDocument
 import pickle
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QMainWindow,QFileDialog#,QDialog,QMessageBox
-#from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
-from PyQt5.QtCore import Qt, QEvent#, QFile,QTextStream
+from PyQt5.QtWidgets import QMainWindow,QFileDialog,QDialog,QMessageBox
+from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
+from PyQt5.QtCore import QFile,QTextStream, Qt, QEvent
 from mainFrm import Ui_MainWindow
+from Highlighter import Highlighter
 
 import zipfile
 from testOfflineDB import News
@@ -33,9 +32,13 @@ class MainFrmMy(QMainWindow,Ui_MainWindow):
         self.pushButton.clicked.connect(lambda: self.search('title'))
         self.searchContentButton.clicked.connect(lambda: self.search('content'))
         self.contenttextEdit.installEventFilter(self)
-        #self.contenttextEdit.enterEvent.connect(self.content_get_focus)
+
 
         self.loadOfflineAction.triggered.connect(self.open)
+
+
+
+
 
     def content_get_focus(self):
         w = self.geometry().width()
@@ -61,24 +64,14 @@ class MainFrmMy(QMainWindow,Ui_MainWindow):
 
     def open(self):
         filename,_ = QFileDialog.getOpenFileName()#None,'Choose File','e:\\','.txt')
-        #with zipfile.ZipFile('news.zip','r',compression=zipfile.ZIP_BZIP2) as myzip:#zipfile.ZipFile.open(filename,'r') as f:
-        #    myzip.extractall()
+        with zipfile.ZipFile('news.zip','r',compression=zipfile.ZIP_BZIP2) as myzip:#zipfile.ZipFile.open(filename,'r') as f:
+            myzip.extractall()
         #TODO 不能这么来，临时的
-        with open(filename,'rb') as f:
-            try:
-                conn = sqlite3.connect('test.db')
-                #x=[(news['name'],news['content'],'人民日报',news['date'],news['ban']) for news in json]
-
-                while True:
-                    news = pickle.load(f)
-                    conn.execute("INSERT INTO NEWS (TITLE,CONTENT,TYPE,DATE,BANCI)   VALUES (?,?,?,?,?)",(news.title,news.content,news.type,news.date,news.banci))
-                    conn.commit()
-                    logging.info(str(news.title))
-                    self.statusbar.showMessage(str(news.title))#('导入%d%%' %(i/len(newList)*100))
-            except EOFError:
-                self.statusbar.showMessage('导入完成')
-            finally:
-                 conn.close()
+        with open('newslist','rb') as f:
+            newList = pickle.load(f)
+            for i,news in enumerate(newList,1):
+                logging.info(str(news.title))
+                self.statusbar.showMessage('导入%d%%' %(i/len(newList)*100))
         return
 
 
@@ -88,12 +81,6 @@ class MainFrmMy(QMainWindow,Ui_MainWindow):
             index = self.resulttreeView.selectionModel().currentIndex()
             title=self.resulttreeView.selectionModel().currentIndex().sibling(index.row(),0).data()
             self.handlelist(title)
-           # if self.resulttreeView.selectionModel().currentIndex().parent().isValid():
-                #title = self.resulttreeView.selectionMode().itemFromIndex(index)
-
-                #self.statusBar().showMessage("Position: (%d,%d)" % (row, column))
-           # else:
-               # self.statusBar().showMessage("Position: (%d,%d) in top level" % (row, column))
 
 
     def search(self,s='title'):
@@ -119,40 +106,16 @@ class MainFrmMy(QMainWindow,Ui_MainWindow):
     def handlelist(self,title):
         conn = sqlite3.connect('test.db')
         rows=conn.execute("SELECT CONTENT FROM NEWS WHERE Num=\'"+str(title)+'\'')
+        keywords = self.searchlineEdit.text().split()
+
+        self.highlighter = Highlighter(self.contenttextEdit.document(),*keywords)
+
+
         for row in rows:
             self.contenttextEdit.setPlainText(row[0])
 
-        for i,word in enumerate(self.searchlineEdit.text().split()):
-            self.mark_keywords(word,i)
-
-    def mark_keywords(self,keyword,i):
-        search_text = keyword
-
-        document = self.contenttextEdit.document()
-        found = False
-        highlight_cursor = QTextCursor(document)
-        cursor = QTextCursor(document)
-        #cursor.setPosition(QTextCursor.Start)
-        #highlight_cursor.setPosition(QTextCursor.Start)
 
 
-        cursor.beginEditBlock()
-
-        color_format = QTextCharFormat(highlight_cursor.charFormat())
-        color_format.setForeground(Qt.red)
-        color_format.setBackground(Qt.yellow)
-        while (not highlight_cursor.isNull() and not highlight_cursor.atEnd()):
-            #查找指定的文本，匹配整个单词
-            #if i%2:
-             #   highlight_cursor = document.find(search_text, highlight_cursor, QTextDocument.FindBackward)
-            #else:
-            highlight_cursor = document.find(search_text, highlight_cursor, QTextDocument.FindWholeWords)
-            if (not highlight_cursor.isNull()):
-                if(not found):
-                    found = True
-                highlight_cursor.mergeCharFormat(color_format)
-
-        cursor.endEditBlock()
 
 
 def addNews(model, *args):
@@ -176,7 +139,6 @@ if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     win = MainFrmMy()
-    win.setWindowIcon(QIcon('icon/writer.ico'))
     win.showMaximized()
     sys.exit(app.exec_())
 

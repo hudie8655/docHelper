@@ -36,7 +36,7 @@ class Downloader(QDialog,Ui_Dialog):
         self.helperurls = []
         self.contenturls = []
 
-        self.pushButton.clicked.connect(self.multi_downloads)
+        self.pushButton.clicked.connect(self.start_downloads)
         self.startDateEdit.setDate(QDate.currentDate())
         self.endDateEdit_2.setDate(QDate.currentDate())
 
