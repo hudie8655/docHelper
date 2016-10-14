@@ -2,7 +2,7 @@
 __author__ = 'user'
 import logging
 import sqlite3
-from PyQt5.QtGui import QStandardItemModel, QPalette, QTextCursor, QTextCharFormat, QTextDocument
+from PyQt5.QtGui import QStandardItemModel, QPalette, QTextCursor, QTextCharFormat, QTextDocument,QIcon
 import pickle
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMainWindow,QFileDialog,QDialog,QMessageBox
@@ -64,14 +64,24 @@ class MainFrmMy(QMainWindow,Ui_MainWindow):
 
     def open(self):
         filename,_ = QFileDialog.getOpenFileName()#None,'Choose File','e:\\','.txt')
-        with zipfile.ZipFile('news.zip','r',compression=zipfile.ZIP_BZIP2) as myzip:#zipfile.ZipFile.open(filename,'r') as f:
-            myzip.extractall()
+        #with zipfile.ZipFile('news.zip','r',compression=zipfile.ZIP_BZIP2) as myzip:#zipfile.ZipFile.open(filename,'r') as f:
+        #    myzip.extractall()
         #TODO 不能这么来，临时的
-        with open('newslist','rb') as f:
-            newList = pickle.load(f)
-            for i,news in enumerate(newList,1):
-                logging.info(str(news.title))
-                self.statusbar.showMessage('导入%d%%' %(i/len(newList)*100))
+        with open(filename,'rb') as f:
+            try:
+                conn = sqlite3.connect('test.db')
+                #x=[(news['name'],news['content'],'人民日报',news['date'],news['ban']) for news in json]
+
+                while True:
+                    news = pickle.load(f)
+                    conn.execute("INSERT INTO NEWS (TITLE,CONTENT,TYPE,DATE,BANCI)   VALUES (?,?,?,?,?)",(news.title,news.content,news.type,news.date,news.banci))
+                    conn.commit()
+                    logging.info(str(news.title))
+                    self.statusbar.showMessage(str(news.title))#('导入%d%%' %(i/len(newList)*100))
+            except EOFError:
+                self.statusbar.showMessage('导入完成')
+            finally:
+                 conn.close()
         return
 
 
@@ -139,6 +149,7 @@ if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     win = MainFrmMy()
+    win.setWindowIcon(QIcon('icon/writer.ico'))
     win.showMaximized()
     sys.exit(app.exec_())
 
