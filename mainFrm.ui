@@ -92,8 +92,15 @@
          <widget class="QTreeView" name="resulttreeView">
           <property name="font">
            <font>
-            <pointsize>10</pointsize>
+            <family>宋体</family>
+            <pointsize>16</pointsize>
            </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">item{height:205px}</string>
+          </property>
+          <property name="sortingEnabled">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -111,12 +118,15 @@
          <widget class="QTextEdit" name="contenttextEdit">
           <property name="font">
            <font>
-            <family>SimSun-ExtB</family>
-            <pointsize>16</pointsize>
+            <family>仿宋</family>
+            <pointsize>20</pointsize>
            </font>
           </property>
           <property name="focusPolicy">
            <enum>Qt::ClickFocus</enum>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
           </property>
          </widget>
         </item>
@@ -141,12 +151,24 @@
     </property>
     <addaction name="loadOfflineAction"/>
    </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>升级</string>
+    </property>
+    <addaction name="updateOnlineaction"/>
+   </widget>
    <addaction name="menu"/>
+   <addaction name="menu_2"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="loadOfflineAction">
    <property name="text">
     <string>导入离线数据包</string>
+   </property>
+  </action>
+  <action name="updateOnlineaction">
+   <property name="text">
+    <string>在线升级报纸</string>
    </property>
   </action>
  </widget>

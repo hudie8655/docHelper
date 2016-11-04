@@ -2,7 +2,8 @@
 __author__ = 'user'
 import logging
 import sqlite3
-from PyQt5.QtGui import QStandardItemModel, QPalette, QTextCursor, QTextCharFormat, QTextDocument,QIcon
+from PyQt5.QtGui import QStandardItemModel, QPalette, QTextCursor, QTextCharFormat, QTextDocument,QIcon, \
+    QTextBlockFormat
 import pickle
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMainWindow,QFileDialog,QDialog,QMessageBox
@@ -13,8 +14,9 @@ from Highlighter import Highlighter
 
 import zipfile
 from testOfflineDB import News
+from MyDownloaderFrm import MainFrmMy as MyUpdateFrm
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.ERROR)
 
 class MainFrmMy(QMainWindow,Ui_MainWindow):
     def __init__(self,parent=None):
@@ -24,8 +26,21 @@ class MainFrmMy(QMainWindow,Ui_MainWindow):
 
 
 
+
+        #textBlockFormat.setLineHeight(40, QTextBlockFormat::FixedHeight);//设置固定行高
+
+
+
+
+
         self.model = createNewsModel(self)
         self.resulttreeView.setModel(self.model)
+        self.resulttreeView.setColumnHidden(0,True)
+        self.resulttreeView.setColumnWidth(1,700)
+        self.resulttreeView.setColumnWidth(2,80)
+        self.resulttreeView.setColumnWidth(3,150)
+        self.resulttreeView.setColumnWidth(4,80)
+
         self.resulttreeView.selectionModel().selectionChanged.connect(self.updateActions)
 
         self.searchlineEdit.returnPressed.connect(lambda: self.search('title'))
@@ -34,11 +49,16 @@ class MainFrmMy(QMainWindow,Ui_MainWindow):
         self.contenttextEdit.installEventFilter(self)
 
 
-        self.loadOfflineAction.triggered.connect(self.open)
+        #self.loadOfflineAction.triggered.connect(self.open)
+        self.updateOnlineaction.triggered.connect(self.update_online)
 
 
 
 
+
+    def update_online(self):
+        updateFrm = MyUpdateFrm(self)
+        updateFrm.show()
 
     def content_get_focus(self):
         w = self.geometry().width()
@@ -109,8 +129,9 @@ class MainFrmMy(QMainWindow,Ui_MainWindow):
                 addNews(self.model,*row)
             self.statusbar.showMessage('完成查询'+str(keywords)+sql)
 
-            for column in range(self.model.columnCount()):
-                self.resulttreeView.resizeColumnToContents(column)
+            #for column in range(self.model.columnCount()):
+            #    self.resulttreeView.resizeColumnToContents(column)
+
 
 
     def handlelist(self,title):
@@ -121,8 +142,15 @@ class MainFrmMy(QMainWindow,Ui_MainWindow):
         self.highlighter = Highlighter(self.contenttextEdit.document(),*keywords)
 
 
+        #self.contenttextEdit.setHtml('<html><body>')
         for row in rows:
-            self.contenttextEdit.setPlainText(row[0])
+            self.contenttextEdit.setPlainText(row[0])#'<p style="line-height:130%">'+row[0]+'<br/></p>')
+        #self.contenttextEdit.append('</body></html>')
+
+
+
+
+
 
 
 
