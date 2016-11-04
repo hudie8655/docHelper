@@ -1,10 +1,14 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#setup代码
-from cx_Freeze import setup, Executable
-executables = [
-    Executable(
-    script='MainFrmMy.py', #目标引用脚本
-    base="win32gui",     #GUI程序需要隐藏控制台
-    targetName = 'Writer.exe',#生成exe的名字
-    icon = "icon/writer.ico" #生成exe的的图标
-)]
+"""
+__title__ = '将TargetOpinionMain python项目转换为exe文件'
+__author__ = '皮'
+__email__ = 'pipisorry@126.com'
+"""
+from PyInstaller.__main__ import run
+
+if __name__ == '__main__':
+    #opts = ['MainFrmMy.py', '-F']
+    # opts = ['MainFrmMy.py', '-F', '-w']
+    opts = ['MyDownloaderFrm.py', '-F', '-w', '--icon=writer.ico']#,'--upx-dir','upx308w']
+    run(opts)
