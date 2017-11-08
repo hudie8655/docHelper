@@ -61,6 +61,16 @@
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="pushButton_Filter">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>过滤</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="pushButton">
             <property name="font">
              <font>

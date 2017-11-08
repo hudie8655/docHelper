@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainFrm.ui'
 #
-# Created by: PyQt5 UI code generator 5.4.2
+# Created by: PyQt5 UI code generator 5.9.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -45,6 +45,9 @@ class Ui_MainWindow(object):
         self.searchlineEdit.setFont(font)
         self.searchlineEdit.setObjectName("searchlineEdit")
         self.horizontalLayout.addWidget(self.searchlineEdit)
+        self.pushButton_Filter = QtWidgets.QPushButton(self.frame)
+        self.pushButton_Filter.setObjectName("pushButton_Filter")
+        self.horizontalLayout.addWidget(self.pushButton_Filter)
         self.pushButton = QtWidgets.QPushButton(self.frame)
         font = QtGui.QFont()
         font.setFamily("Arial")
@@ -112,6 +115,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "公文小助手"))
+        self.pushButton_Filter.setText(_translate("MainWindow", "过滤"))
         self.pushButton.setText(_translate("MainWindow", "查询标题"))
         self.searchContentButton.setText(_translate("MainWindow", "查询内容"))
         self.menu.setTitle(_translate("MainWindow", "文件"))

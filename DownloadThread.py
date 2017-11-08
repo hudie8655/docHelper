@@ -434,8 +434,8 @@ class TjrbDownloadThread(QThread):
         self.tellSignal.emit(str(self.endDate))
         i = self.startDate
         while i <= self.endDate:
-            urls = ['http://epaper.tianjinwe.com/tjrb/tjrb/' + i.toString(
-                'yyyy-MM/dd') + '/node_{:d}.htm'.format(x) for x in range(2, 3)]
+            urls = ['http://epaper.tianjinwe.com/tjrb/html/' + i.toString(
+                'yyyy-MM/dd') + '/node_{:d}.htm'.format(x) for x in range(2, 21)]
             self.starturls.extend(urls)
             i = i.addDays(1)
 

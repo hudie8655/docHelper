@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+from FilterDialog import FilterDialog
+from FilterFrm import Ui_FilterDialog
+
 __author__ = 'user'
 import logging
 import sqlite3
@@ -47,6 +50,9 @@ class MainFrmMy(QMainWindow,Ui_MainWindow):
         self.pushButton.clicked.connect(lambda: self.search('title'))
         self.searchContentButton.clicked.connect(lambda: self.search('content'))
         self.contenttextEdit.installEventFilter(self)
+
+        self.pushButton_Filter.clicked.connect(lambda :self.filter())
+        self.pushButton_Filter.setEnabled(False)
 
 
         #self.loadOfflineAction.triggered.connect(self.open)
@@ -114,6 +120,7 @@ class MainFrmMy(QMainWindow,Ui_MainWindow):
 
 
     def search(self,s='title'):
+        self.pushButton_Filter.setEnabled(True)
         #TODO 清空结果 不知道为什么clear不行，难道把关联关系一并清除了？
         self.model.removeRows(0,self.model.rowCount())
         keywords=self.searchlineEdit.text().split()
@@ -131,6 +138,15 @@ class MainFrmMy(QMainWindow,Ui_MainWindow):
 
             #for column in range(self.model.columnCount()):
             #    self.resulttreeView.resizeColumnToContents(column)
+
+    def filter(self):
+        filterDialog = FilterDialog(self)
+        typeset = set()
+        for i in range(0,self.model.rowCount()):
+            typeset.add(self.model.index(i,2).data())
+        filterDialog.typelistWidget.addItems(list(typeset))
+        filterDialog.show()
+
 
 
 
