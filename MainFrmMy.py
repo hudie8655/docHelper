@@ -155,18 +155,27 @@ class MainFrmMy(QMainWindow,Ui_MainWindow):
     def filter(self):
         #filterDialog = FilterDialog(self)
         typeset = set()
+        banset = set()
         for i in range(0,self.model.rowCount()):
             typeset.add(self.model.index(i,2).data())
+            banset.add(self.model.index(i,4).data())
         self.filterDialog.typelistWidget.clear()
         self.filterDialog.typelistWidget.addItems(list(typeset))
+        self.filterDialog.typelistWidget.selectAll()
+        self.filterDialog.banListWidget.clear()
+        self.filterDialog.banListWidget.addItems(sorted(list(banset)))
+        self.filterDialog.banListWidget.selectAll()
         self.filterDialog.show()
 
     def getfiltersetting(self):
-        print(self.filterDialog.typelistWidget.selectedItems()[0].text())
         types = [x.text() for x in self.filterDialog.typelistWidget.selectedItems()]
-        self.filtermodel = MyQSortFilterProxyModel(types,('03','01'))
+        bans = [x.text() for x in self.filterDialog.banListWidget.selectedItems()]
+        sDate = self.filterDialog.fsdateEdit.date()
+        eDate = self.filterDialog.fedateEdit.date()
+        self.filtermodel = MyQSortFilterProxyModel(types,bans,sDate,eDate)
         self.filtermodel.setSourceModel(self.model)
         self.resulttreeView.setModel(self.filtermodel)
+        self.resulttreeView.selectionModel().selectionChanged.connect(self.updateActions)
 
         #self.filtermodel.setFilterRegExp(QRegExp("天津日报", Qt.CaseInsensitive,QRegExp.FixedString))
         #self.filtermodel.setFilterKeyColumn(2)
