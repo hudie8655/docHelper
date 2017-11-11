@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from FilterDialog import FilterDialog
 from FilterFrm import Ui_FilterDialog
+from MyQSortFilterProxyModel import MyQSortFilterProxyModel
 
 __author__ = 'user'
 import logging
@@ -11,7 +12,7 @@ import pickle
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMainWindow,QFileDialog,QDialog,QMessageBox
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
-from PyQt5.QtCore import QFile,QTextStream, Qt, QEvent
+from PyQt5.QtCore import QFile, QTextStream, Qt, QEvent, QSortFilterProxyModel, QRegExp
 from mainFrm import Ui_MainWindow
 from Highlighter import Highlighter
 
@@ -37,14 +38,16 @@ class MainFrmMy(QMainWindow,Ui_MainWindow):
 
 
         self.model = createNewsModel(self)
+
         self.resulttreeView.setModel(self.model)
+        #self.resulttreeView.setModel(self.filtermodel)
         self.resulttreeView.setColumnHidden(0,True)
         self.resulttreeView.setColumnWidth(1,700)
         self.resulttreeView.setColumnWidth(2,80)
         self.resulttreeView.setColumnWidth(3,150)
         self.resulttreeView.setColumnWidth(4,80)
 
-        self.resulttreeView.selectionModel().selectionChanged.connect(self.updateActions)
+
 
         self.searchlineEdit.returnPressed.connect(lambda: self.search('title'))
         self.pushButton.clicked.connect(lambda: self.search('title'))
@@ -57,6 +60,9 @@ class MainFrmMy(QMainWindow,Ui_MainWindow):
 
         #self.loadOfflineAction.triggered.connect(self.open)
         self.updateOnlineaction.triggered.connect(self.update_online)
+
+        self.filterDialog = FilterDialog(self)
+        self.filterDialog.accepted.connect(self.getfiltersetting)
 
 
 
@@ -121,6 +127,11 @@ class MainFrmMy(QMainWindow,Ui_MainWindow):
 
     def search(self,s='title'):
         self.pushButton_Filter.setEnabled(True)
+
+        self.resulttreeView.setModel(self.model)
+        self.resulttreeView.selectionModel().selectionChanged.connect(self.updateActions)
+
+
         #TODO 清空结果 不知道为什么clear不行，难道把关联关系一并清除了？
         self.model.removeRows(0,self.model.rowCount())
         keywords=self.searchlineEdit.text().split()
@@ -136,17 +147,32 @@ class MainFrmMy(QMainWindow,Ui_MainWindow):
                 addNews(self.model,*row)
             self.statusbar.showMessage('完成查询'+str(keywords)+sql)
 
+
+
             #for column in range(self.model.columnCount()):
             #    self.resulttreeView.resizeColumnToContents(column)
 
     def filter(self):
-        filterDialog = FilterDialog(self)
+        #filterDialog = FilterDialog(self)
         typeset = set()
         for i in range(0,self.model.rowCount()):
             typeset.add(self.model.index(i,2).data())
-        filterDialog.typelistWidget.addItems(list(typeset))
-        filterDialog.show()
+        self.filterDialog.typelistWidget.clear()
+        self.filterDialog.typelistWidget.addItems(list(typeset))
+        self.filterDialog.show()
 
+    def getfiltersetting(self):
+        print(self.filterDialog.typelistWidget.selectedItems()[0].text())
+        types = [x.text() for x in self.filterDialog.typelistWidget.selectedItems()]
+        self.filtermodel = MyQSortFilterProxyModel(types,('03','01'))
+        self.filtermodel.setSourceModel(self.model)
+        self.resulttreeView.setModel(self.filtermodel)
+
+        #self.filtermodel.setFilterRegExp(QRegExp("天津日报", Qt.CaseInsensitive,QRegExp.FixedString))
+        #self.filtermodel.setFilterKeyColumn(2)
+
+        #self.filtermodel.setFilterFixedString('01')
+        #self.filtermodel.setFilterKeyColumn(4)
 
 
 
@@ -194,6 +220,7 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     win = MainFrmMy()
     win.setWindowIcon(QIcon('icon/writer.ico'))
+    win.searchlineEdit.setText('习近平')
     win.showMaximized()
     sys.exit(app.exec_())
 

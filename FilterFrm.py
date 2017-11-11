@@ -20,6 +20,7 @@ class Ui_FilterDialog(object):
         self.buttonBox.setObjectName("buttonBox")
         self.typelistWidget = QtWidgets.QListWidget(FilterDialog)
         self.typelistWidget.setGeometry(QtCore.QRect(50, 10, 256, 192))
+        self.typelistWidget.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.typelistWidget.setObjectName("typelistWidget")
 
         self.retranslateUi(FilterDialog)
