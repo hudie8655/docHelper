@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>564</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -121,6 +121,22 @@
     </datetime>
    </property>
    <property name="calendarPopup">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QListWidget" name="pretitlelistWidget">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>330</y>
+     <width>351</width>
+     <height>192</height>
+    </rect>
+   </property>
+   <property name="selectionMode">
+    <enum>QAbstractItemView::ExtendedSelection</enum>
+   </property>
+   <property name="sortingEnabled">
     <bool>true</bool>
    </property>
   </widget>

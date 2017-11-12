@@ -9,12 +9,13 @@ import zipfile
 logging.basicConfig(level=logging.INFO)
 
 class News():
-    def __init__(self,title,content,type,date,banci):
+    def __init__(self,title,content,type,date,banci,pretitle=''):
         self.title = title
         self.content = content
         self.type = type
         self.date = date
         self.banci = banci
+        self.pretitle = pretitle
 
 
 if __name__=='__main__':
@@ -23,7 +24,7 @@ if __name__=='__main__':
     rows=conn.execute(r"SELECT * FROM NEWS WHERE TITLE like '%习近平%'")
 
     for r in rows:
-        newsList.append(News(r[1],r[2],r[3],r[4],r[5]))
+        newsList.append(News(r[1],r[2],r[3],r[4],r[5]),r[6])
     conn.close()
     with open('newslist','wb') as f:
         pickle.dump(newsList,f)

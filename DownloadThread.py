@@ -55,14 +55,14 @@ class WriteThread(QThread):
                 while  count<=200:
                     newslist.append(self.myqueue.get(timeout=5))
                     count += 1
-                x=[(news.title,news.content,news.type,news.date,news.banci) for news in newslist]
-                conn.executemany("INSERT INTO NEWS (TITLE,CONTENT,TYPE,DATE,BANCI)   VALUES (?,?,?,?,?)",x)
+                x=[(news.title,news.content,news.type,news.date,news.banci,news.pretitle) for news in newslist]
+                conn.executemany("INSERT INTO NEWS (TITLE,CONTENT,TYPE,DATE,BANCI,PRETITLE)   VALUES (?,?,?,?,?,?)",x)
                 conn.commit()
                 self.tellSignal.emit('write thread:write 100')
             except queue.Empty:
                 if len(newslist)>0:
-                    x=[(news.title,news.content,news.type,news.date,news.banci) for news in newslist]
-                    conn.executemany("INSERT INTO NEWS (TITLE,CONTENT,TYPE,DATE,BANCI)   VALUES (?,?,?,?,?)",x)
+                    x=[(news.title,news.content,news.type,news.date,news.banci,news.pretitle) for news in newslist]
+                    conn.executemany("INSERT INTO NEWS (TITLE,CONTENT,TYPE,DATE,BANCI,PRETITLE)   VALUES (?,?,?,?,?,?)",x)
                     conn.commit()
                     self.tellSignal.emit('write thread:write left')
                 mutex.lock()
@@ -433,9 +433,11 @@ class TjrbDownloadThread(QThread):
         self.tellSignal.emit(str(self.startDate))
         self.tellSignal.emit(str(self.endDate))
         i = self.startDate
+
+        #TODO find a from page
         while i <= self.endDate:
             urls = ['http://epaper.tianjinwe.com/tjrb/html/' + i.toString(
-                'yyyy-MM/dd') + '/node_{:d}.htm'.format(x) for x in range(1, 9)]
+                'yyyy-MM/dd') + '/node_{:d}.htm'.format(x) for x in range(1,24)]
             self.starturls.extend(urls)
             i = i.addDays(1)
 
@@ -474,7 +476,9 @@ class TjrbDownloadThread(QThread):
                 date = '-'.join(contenturl.split('/')[5:7])
                 #ban = contenturl.split('.')[-2].split('-')[-1]
                 content = '\n'.join([p.get_text() for p in bsobj.select('founder-content p')])
-                news = News(title, content, kind, date, ban)
+
+                pretitle = bsobj.find(text=re.compile('npm:article-pretitle')).parent.text.strip()
+                news = News(title, content, kind, date, ban,pretitle)
                 self.myqueue.put(news)
 
                 mutex.lock()

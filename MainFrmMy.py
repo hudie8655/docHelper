@@ -136,14 +136,14 @@ class MainFrmMy(QMainWindow,Ui_MainWindow):
         self.model.removeRows(0,self.model.rowCount())
         keywords=self.searchlineEdit.text().split()
         if keywords:
-            sql='SELECT Num,TITLE,TYPE ,DATE ,BANCI FROM NEWS WHERE '+s+' like \'%'+str('%\' and '+s+' like \'%').join(keywords)+'%\' order by date'
+            sql='SELECT Num,TITLE,TYPE ,DATE ,BANCI,PRETITLE FROM NEWS WHERE '+s+' like \'%'+str('%\' and '+s+' like \'%').join(keywords)+'%\' order by date'
 
             self.statusbar.showMessage('正在查询'+str(keywords))
             conn = sqlite3.connect('test.db')
             cur=conn.execute(sql)
             #self.resultlistView.
             for row in cur:
-                logging.info(str(row[0])+'\t'+'\t'.join(row[1:]))
+                #logging.info(str(row[0])+'\t'+'\t'.join(row[1:]))
                 addNews(self.model,*row)
             self.statusbar.showMessage('完成查询'+str(keywords)+sql)
 
@@ -156,23 +156,30 @@ class MainFrmMy(QMainWindow,Ui_MainWindow):
         #filterDialog = FilterDialog(self)
         typeset = set()
         banset = set()
+        pretitleset = set()
         for i in range(0,self.model.rowCount()):
             typeset.add(self.model.index(i,2).data())
             banset.add(self.model.index(i,4).data())
+            pretitleset.add(self.model.index(i,5).data())
+
         self.filterDialog.typelistWidget.clear()
         self.filterDialog.typelistWidget.addItems(list(typeset))
         self.filterDialog.typelistWidget.selectAll()
         self.filterDialog.banListWidget.clear()
         self.filterDialog.banListWidget.addItems(sorted(list(banset)))
         self.filterDialog.banListWidget.selectAll()
+        self.filterDialog.pretitlelistWidget.clear()
+        self.filterDialog.pretitlelistWidget.addItems(sorted(list(pretitleset)))
+        self.filterDialog.pretitlelistWidget.selectAll()
         self.filterDialog.show()
 
     def getfiltersetting(self):
         types = [x.text() for x in self.filterDialog.typelistWidget.selectedItems()]
         bans = [x.text() for x in self.filterDialog.banListWidget.selectedItems()]
+        pres = [x.text() for x in self.filterDialog.pretitlelistWidget.selectedItems()]
         sDate = self.filterDialog.fsdateEdit.date()
         eDate = self.filterDialog.fedateEdit.date()
-        self.filtermodel = MyQSortFilterProxyModel(types,bans,sDate,eDate)
+        self.filtermodel = MyQSortFilterProxyModel(types,bans,sDate,eDate,pres)
         self.filtermodel.setSourceModel(self.model)
         self.resulttreeView.setModel(self.filtermodel)
         self.resulttreeView.selectionModel().selectionChanged.connect(self.updateActions)
@@ -215,13 +222,14 @@ def addNews(model, *args):
 
 
 def createNewsModel(parent):
-    model = QStandardItemModel(0, 5, parent)
+    model = QStandardItemModel(0, 6, parent)
 
     model.setHeaderData(0, Qt.Horizontal, "编号")
     model.setHeaderData(1, Qt.Horizontal, "标题")
     model.setHeaderData(2, Qt.Horizontal, "报纸")
     model.setHeaderData(3, Qt.Horizontal, "日期")
     model.setHeaderData(4, Qt.Horizontal, "版面")
+    model.setHeaderData(5, Qt.Horizontal, "栏目")
     return model
 
 if __name__ == "__main__":
