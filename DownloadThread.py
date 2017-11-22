@@ -112,6 +112,18 @@ class DownloadThread(QThread):
 
 
     def gen_starturl(self):
+        def extract_indexs(url):
+            tmp=set([url])
+            try:
+                html = urllib.request.urlopen(url)
+                bsobj = BeautifulSoup(html,'lxml')
+                rp = re.compile('nbs.D110000renmrb.*$')
+                for link in bsobj.select('a[href^="nbs"]'):
+                    tmp.add(rp.sub(link['href'], url))
+            except Exception as e:
+                print(e)
+            return list(tmp)
+
     
         self.tellSignal.emit('gen')
         self.starturls.clear()
@@ -123,18 +135,18 @@ class DownloadThread(QThread):
         # TODO 需要设定最后日期为今日，否则此处逻辑会乱
         # 为了减少判断次数
         #self.endDate = self.endDate if self.endDate > QDate.currentDate() else QDate.currentDate()
-        while i < self.endDate:
+        while i <= self.endDate:
             #logging.info('start date%s', str(i))
-            urls = ['http://paper.people.com.cn/rmrb/html/' + i.toString(
-                'yyyy-MM/dd') + '/nbs.D110000renmrb_{:02d}.htm'.format(x) for x in range(1, 5)]
-            self.starturls.extend(urls)
+            urls = 'http://paper.people.com.cn/rmrb/html/' + i.toString(
+                'yyyy-MM/dd') + '/nbs.D110000renmrb_{:02d}.htm'.format(1)
+            self.starturls.extend(extract_indexs(urls))
             i = i.addDays(1)
-        if self.endDate == QDate.currentDate():
-        # TODO 不再判断，最多最后一个页面错误抓取几次
-            urls = [
-            'http://paper.people.com.cn/rmrb/html/' + i.toString('yyyy-MM/dd') + '/nbs.D110000renmrb_{:02d}.htm'.format(
-                x) for x in range(1, 25)]
-            self.starturls.extend(urls)
+        # if self.endDate == QDate.currentDate():
+        # # TODO 不再判断，最多最后一个页面错误抓取几次
+        #     urls = [
+        #     'http://paper.people.com.cn/rmrb/html/' + i.toString('yyyy-MM/dd') + '/nbs.D110000renmrb_{:02d}.htm'.format(
+        #         x) for x in range(1, 25)]
+        #     self.starturls.extend(urls)
 
 
     def get_contenturls(self):
@@ -427,6 +439,18 @@ class TjrbDownloadThread(QThread):
 
 
     def gen_starturl(self):
+        def extract_indexs(url):
+            tmp=set([url])
+            try:
+                html = urllib.request.urlopen(url)
+                bsobj = BeautifulSoup(html,'lxml')
+                rp = re.compile('node.*$')
+                for link in bsobj.select('a[href^="node_"]'):
+                    tmp.add(rp.sub(link['href'], url))
+            except Exception as e:
+                print(e)
+            return list(tmp)
+
         self.tellSignal.emit('gen')
         self.starturls.clear()
 
@@ -436,9 +460,9 @@ class TjrbDownloadThread(QThread):
 
         #TODO find a from page
         while i <= self.endDate:
-            urls = ['http://epaper.tianjinwe.com/tjrb/html/' + i.toString(
-                'yyyy-MM/dd') + '/node_{:d}.htm'.format(x) for x in range(1,24)]
-            self.starturls.extend(urls)
+            urls = 'http://epaper.tianjinwe.com/tjrb/html/' + i.toString(
+                'yyyy-MM/dd') + '/node_{:d}.htm'.format(1)
+            self.starturls.extend(extract_indexs(urls))
             i = i.addDays(1)
 
 
