@@ -7,13 +7,20 @@ class Highlighter(QSyntaxHighlighter):
     def __init__(self,parent=None ,*keywords):
         super(Highlighter, self).__init__(parent)
 
-        keywordFormat = QTextCharFormat()
-        keywordFormat.setForeground(Qt.red)
-        keywordFormat.setBackground(Qt.yellow)
-        keywordFormat.setFontWeight(QFont.Bold)
 
-        self.highlightingRules = [(pattern, keywordFormat)
-                for pattern in keywords]
+        foregroundList = [Qt.red,Qt.blue,Qt.green]
+        #keywordFormat.setForeground(Qt.red)
+
+        i=0
+        self.highlightingRules=[]
+        for k in keywords:
+            keywordFormat = QTextCharFormat()
+            keywordFormat.setBackground(Qt.yellow)
+            keywordFormat.setFontWeight(QFont.Bold)
+            keywordFormat.setForeground(foregroundList[i % 3])
+            self.highlightingRules.append((k,keywordFormat ))
+            i+=1
+        #self.highlightingRules = [(pattern, keywordFormat) for pattern in keywords]
 
 
     def highlightBlock(self, text):

@@ -142,10 +142,12 @@ class MainFrmMy(QMainWindow,Ui_MainWindow):
             conn = sqlite3.connect('test.db')
             cur=conn.execute(sql)
             #self.resultlistView.
-            for row in cur:
+            resultlist = cur.fetchall()
+            for row in resultlist:
                 #logging.info(str(row[0])+'\t'+'\t'.join(row[1:]))
                 addNews(self.model,*row)
-            self.statusbar.showMessage('完成查询'+str(keywords)+sql)
+
+            self.statusbar.showMessage('完成查询'+str(keywords)+sql+'共{:d}条结果'.format(len(resultlist)))
 
 
 
