@@ -81,14 +81,12 @@ class DownloadThread(QThread):
     tellSignal = pyqtSignal(str)
 
     def __init__(self):
-        super(QThread, self).__init__()
+        super(DownloadThread, self).__init__()
         # self.moveToThread(self)
 
-        self.starturls = []
-        self.helperurls = []
-        self.contenturls = []
+        self.starturls = set()
+        self.contenturls = set()
         self.myqueue = pipline
-        # self.startDownload.connect(self.start)
 
     def start_download(self, sDate, eDate, Ban):
         self.startDate = sDate
@@ -119,7 +117,7 @@ class DownloadThread(QThread):
                 tmp.add(rp.sub(link['href'], url))
         except Exception as e:
             print(e)
-        return list(tmp)
+        return tmp
 
     def gen_starturl(self,urls='http://paper.people.com.cn/rmrb/html/{}/nbs.D110000renmrb_01.htm',baozhi_flag='nbs.D110000renmrb.*$', banurl_flag='nbs'):
 
@@ -130,7 +128,7 @@ class DownloadThread(QThread):
         self.tellSignal.emit(str(self.endDate))
         i = self.startDate
         while i <= self.endDate:
-            self.starturls.extend(self.extract_indexs(urls.format(i.toString('yyyy-MM/dd') )))
+            self.starturls.update(self.extract_indexs(urls.format(i.toString('yyyy-MM/dd') ),baozhi_flag,banurl_flag))
             i = i.addDays(1)
 
 
@@ -146,7 +144,7 @@ class DownloadThread(QThread):
                 rp = re.compile('nbs.*$')
                 for link in bsobj.select('#titleList a'):
                     # logging.info('extract %s' % url)
-                    self.contenturls.append(rp.sub(link['href'], url))
+                    self.contenturls.update(rp.sub(link['href'], url))
             except Exception as e:
                 print(e)
 
@@ -349,6 +347,15 @@ class JjrbDownloadThread(QThread):
 
 class TjrbDownloadThread(DownloadThread):
 
+    def __init__(self):
+        super(TjrbDownloadThread, self).__init__()
+        # self.moveToThread(self)
+
+    # def start_download(self, sDate, eDate, Ban):
+    #     self.startDate = sDate
+    #     self.endDate = eDate
+    #     self.start()
+
     def get_contenturls(self):
         self.tellSignal.emit('get_contenturls')
         self.tellSignal.emit('\n'.join(self.starturls))
@@ -362,7 +369,7 @@ class TjrbDownloadThread(DownloadThread):
                 for link in bsobj.select('a[href^="content"]'):
                     # logging.info('extract %s' % url)
                     tmp.add(rp.sub(link['href'], url))
-                self.contenturls.extend(tmp)
+                self.contenturls.update(tmp)
             except Exception as e:
                 print(e)
 
