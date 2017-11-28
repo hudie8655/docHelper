@@ -133,7 +133,7 @@ class DownloadThread(QThread):
 
 
 
-    def get_contenturls(self):
+    def get_contenturls(self, ban_flag='nbs.*$', content_flag='nw'):
         self.tellSignal.emit('get_contenturls')
         self.tellSignal.emit(''.join(self.starturls))
         for url in self.starturls:
@@ -141,10 +141,10 @@ class DownloadThread(QThread):
                 self.tellSignal.emit('open %s' % url)
                 html = urllib.request.urlopen(url)
                 bsobj = BeautifulSoup(html, 'lxml')
-                rp = re.compile('nbs.*$')
-                for link in bsobj.select('#titleList a'):
+                rp = re.compile('%s' % ban_flag)
+                for link in bsobj.select('a[href^="%s"]' % content_flag):
                     # logging.info('extract %s' % url)
-                    self.contenturls.update(rp.sub(link['href'], url))
+                    self.contenturls.add(rp.sub(link['href'], url))
             except Exception as e:
                 print(e)
 
@@ -351,27 +351,22 @@ class TjrbDownloadThread(DownloadThread):
         super(TjrbDownloadThread, self).__init__()
         # self.moveToThread(self)
 
-    # def start_download(self, sDate, eDate, Ban):
-    #     self.startDate = sDate
-    #     self.endDate = eDate
-    #     self.start()
-
-    def get_contenturls(self):
-        self.tellSignal.emit('get_contenturls')
-        self.tellSignal.emit('\n'.join(self.starturls))
-        for url in self.starturls:
-            try:
-                # logging.info('open %s' % url)
-                html = urllib.request.urlopen(url)
-                bsobj = BeautifulSoup(html, 'lxml')
-                rp = re.compile('node.*$')
-                tmp = set()
-                for link in bsobj.select('a[href^="content"]'):
-                    # logging.info('extract %s' % url)
-                    tmp.add(rp.sub(link['href'], url))
-                self.contenturls.update(tmp)
-            except Exception as e:
-                print(e)
+    # def get_contenturls(self):
+    #     self.tellSignal.emit('get_contenturls')
+    #     self.tellSignal.emit('\n'.join(self.starturls))
+    #     for url in self.starturls:
+    #         try:
+    #             # logging.info('open %s' % url)
+    #             html = urllib.request.urlopen(url)
+    #             bsobj = BeautifulSoup(html, 'lxml')
+    #             rp = re.compile('node.*$')
+    #             tmp = set()
+    #             for link in bsobj.select('a[href^="content"]'):
+    #                 # logging.info('extract %s' % url)
+    #                 tmp.add(rp.sub(link['href'], url))
+    #             self.contenturls.update(tmp)
+    #         except Exception as e:
+    #             print(e)
 
     def parse_content(self):
         self.tellSignal.emit('parse_content')
@@ -410,7 +405,7 @@ class TjrbDownloadThread(DownloadThread):
         workingThreadsCount += 1
         mutex.unlock()
         self.gen_starturl(urls='http://epaper.tianjinwe.com/tjrb/html/{}/node_1.htm',baozhi_flag='node.*$', banurl_flag='node_')
-        self.get_contenturls()
+        self.get_contenturls(ban_flag='node.*$',content_flag="content")
         self.parse_content()
         mutex.lock()
         workingThreadsCount -= 1
